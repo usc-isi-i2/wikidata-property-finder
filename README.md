@@ -1,4 +1,5 @@
 # wikidata-property-finder
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/Otamio/wikidata-property-finder/HEAD)
 
 PropertyFinder tries to find linkages between dataset columns and wikidata properties.
 
