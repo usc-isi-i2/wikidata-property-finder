@@ -13,7 +13,7 @@ To run `PropertyFinder` on a virtual environment:
 
 `conda create --name propertyfinder python=3.7`
 
-`conda activate`
+`conda activate propertyfinder`
 
 3. Install dependencies from requirements.txt
 
