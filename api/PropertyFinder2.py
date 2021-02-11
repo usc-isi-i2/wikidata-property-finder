@@ -337,6 +337,11 @@ class PropertyFinder(object):
         if not type_ is None and not PropertyFinder.metadata.check_type_allowed(type_):
             return {'Error': 'Input data_type is not supported'}, 400
 
+        # Check remote is running
+        response = get(f'{self.host}/time?extra_info=true&language=en&item=property&type=ngram&size=1&instance_of=', verify=False)
+        if response.status_code >= 500:
+            return {'Error': 'Remote service for querying properties is down.'}, 500
+
         scope = request.args.get('scope', 'both')
         filter = request.args.get('filter', 'true')
         constraint = request.args.get('constraint', None)
