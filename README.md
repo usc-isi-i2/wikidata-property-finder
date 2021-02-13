@@ -35,6 +35,7 @@ To run `PropertyFinder` on Binder:
 - Users can find API usages in the notebook `Demo.ipynb`
 
 The most basic request is in the form, which returns wikidata properties most relevant to the input `str`
+
 `http://localhost:12576/search?label=<str>`
 
 Users are also allowed to specify the data_types, scope, and size of properties returned by passing additional parameters. The description of these parameters are specified in the `Inputs` section. The usage of these parameters are:

@@ -43,35 +43,39 @@ class PropertyFinder(object):
         response2 = get(f'{self.host}/{label}?extra_info=true&language=en&item=property&type=ngram&size={self.query_size}&instance_of=', verify=False)
         query_result = set([x['qnode'] for x in response2.json()])
 
-        # Split word using wordninja
-        if len(query_result) == 0 and self.ninja:
-            label_splitted = ' '.join([x[:10] for x in wordninja.split(label)])
-            response2 = get(f'{self.host}/{label_splitted}?extra_info=true&language=en&item=property&type=ngram&size={self.query_size}&instance_of=', verify=False)
-            for x in response2.json():
-                query_result.add(x['qnode'])
-
-        # Use a part of the input as the query string
-        if len(query_result) == 0 and self.partial_query:
-
-            label_splitted = [x[:10] for x in wordninja.split(label)]
-
-            response2a = get(f'{self.host}/{label_splitted[0]}?extra_info=true&language=en&item=property&type=ngram&size={self.query_size}&instance_of=', verify=False)
-            for x in response2a.json():
-                query_result.add(x['qnode'])
-
-            for x in response2b.json():
-                response2b = get(f'{self.host}/{label_splitted[-1]}?extra_info=true&language=en&item=property&type=ngram&size={self.query_size}&instance_of=', verify=False)
-                query_result.add(x['qnode'])
-
-            if len(label_splitted) > 2:
-
-                response2c = get(f'{self.host}/{label_splitted[0]+label_splitted[1]}?extra_info=true&language=en&item=property&type=ngram&size={self.query_size}&instance_of=', verify=False)
-                for x in response2c.json():
+        try:
+            # Split word using wordninja
+            if len(query_result) == 0 and self.ninja:
+                label_splitted = ' '.join([x[:10] for x in wordninja.split(label)])
+                response2 = get(f'{self.host}/{label_splitted}?extra_info=true&language=en&item=property&type=ngram&size={self.query_size}&instance_of=', verify=False)
+                for x in response2.json():
                     query_result.add(x['qnode'])
 
-                response2d = get(f'{self.host}/{label_splitted[-2]+label_splitted[-1]}?extra_info=true&language=en&item=property&type=ngram&size={self.query_size}&instance_of=', verify=False)
-                for x in response2d.json():
-                    query_result.add(x['qnode'])
+
+                # Use a part of the input as the query string
+                if len(query_result) == 0 and self.partial_query:
+
+                    label_splitted = [x[:10] for x in wordninja.split(label)]
+
+                    response2a = get(f'{self.host}/{label_splitted[0]}?extra_info=true&language=en&item=property&type=ngram&size={self.query_size}&instance_of=', verify=False)
+                    for x in response2a.json():
+                        query_result.add(x['qnode'])
+
+                    response2b = get(f'{self.host}/{label_splitted[-1]}?extra_info=true&language=en&item=property&type=ngram&size={self.query_size}&instance_of=', verify=False)
+                    for x in response2b.json():
+                        query_result.add(x['qnode'])
+
+                    if len(label_splitted) > 2:
+
+                        response2c = get(f'{self.host}/{label_splitted[0]+label_splitted[1]}?extra_info=true&language=en&item=property&type=ngram&size={self.query_size}&instance_of=', verify=False)
+                        for x in response2c.json():
+                            query_result.add(x['qnode'])
+
+                        response2d = get(f'{self.host}/{label_splitted[-2]+label_splitted[-1]}?extra_info=true&language=en&item=property&type=ngram&size={self.query_size}&instance_of=', verify=False)
+                        for x in response2d.json():
+                            query_result.add(x['qnode'])
+        except:
+            return []
 
         if type_:
             return [x for x in query_result if PropertyFinder.metadata.check_property_exists(x) and PropertyFinder.metadata.check_type(x, type_)]
