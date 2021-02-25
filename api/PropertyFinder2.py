@@ -12,16 +12,17 @@ from .ranking import PropertyRanker
 from .settings import FILE_claims_property, JSON_constraints, KGTK_search
 
 import warnings
+
 warnings.filterwarnings("ignore")
 
-class PropertyFinder(object):
 
+class PropertyFinder(object):
     metadata = PropertyMetaData()
     ranker = PropertyRanker()
 
     def __init__(self, host=KGTK_search,
-                        metadata_constraints=JSON_constraints,
-                        query_size=500, use_ninja=True, use_part=True):
+                 metadata_constraints=JSON_constraints,
+                 query_size=500, use_ninja=True, use_part=True):
         self.host = host
 
         self.map_P1696 = self.gen_relation('P1696')
@@ -40,45 +41,63 @@ class PropertyFinder(object):
         ''' Given a query string: label,
             get relevant properties from the KGTK-search API
         '''
-        response2 = get(f'{self.host}/{label}?extra_info=true&language=en&item=property&type=ngram&size={self.query_size}&instance_of=', verify=False)
+        response2 = get(
+            f'{self.host}/{label}?extra_info=true&language=en&item=property&type=ngram'
+            f'&size={self.query_size}&instance_of=',
+            verify=False)
         query_result = set([x['qnode'] for x in response2.json()])
 
         try:
             # Split word using wordninja
             if len(query_result) == 0 and self.ninja:
                 label_splitted = ' '.join([x[:10] for x in wordninja.split(label)])
-                response2 = get(f'{self.host}/{label_splitted}?extra_info=true&language=en&item=property&type=ngram&size={self.query_size}&instance_of=', verify=False)
+                response2 = get(
+                    f'{self.host}/{label_splitted}?extra_info=true&language=en&item=property'
+                    f'&type=ngram&size={self.query_size}&instance_of=',
+                    verify=False)
                 for x in response2.json():
                     query_result.add(x['qnode'])
-
 
                 # Use a part of the input as the query string
                 if len(query_result) == 0 and self.partial_query:
 
                     label_splitted = [x[:10] for x in wordninja.split(label)]
 
-                    response2a = get(f'{self.host}/{label_splitted[0]}?extra_info=true&language=en&item=property&type=ngram&size={self.query_size}&instance_of=', verify=False)
+                    response2a = get(
+                        f'{self.host}/{label_splitted[0]}?extra_info=true&language=en&item=property'
+                        f'&type=ngram&size={self.query_size}&instance_of=',
+                        verify=False)
                     for x in response2a.json():
                         query_result.add(x['qnode'])
 
-                    response2b = get(f'{self.host}/{label_splitted[-1]}?extra_info=true&language=en&item=property&type=ngram&size={self.query_size}&instance_of=', verify=False)
+                    response2b = get(
+                        f'{self.host}/{label_splitted[-1]}?extra_info=true&language=en&item=property'
+                        f'&type=ngram&size={self.query_size}&instance_of=',
+                        verify=False)
                     for x in response2b.json():
                         query_result.add(x['qnode'])
 
                     if len(label_splitted) > 2:
 
-                        response2c = get(f'{self.host}/{label_splitted[0]+label_splitted[1]}?extra_info=true&language=en&item=property&type=ngram&size={self.query_size}&instance_of=', verify=False)
+                        response2c = get(
+                            f'{self.host}/{label_splitted[0] + label_splitted[1]}?extra_info=true'
+                            f'&language=en&item=property&type=ngram&size={self.query_size}&instance_of=',
+                            verify=False)
                         for x in response2c.json():
                             query_result.add(x['qnode'])
 
-                        response2d = get(f'{self.host}/{label_splitted[-2]+label_splitted[-1]}?extra_info=true&language=en&item=property&type=ngram&size={self.query_size}&instance_of=', verify=False)
+                        response2d = get(
+                            f'{self.host}/{label_splitted[-2] + label_splitted[-1]}?extra_info=true'
+                            f'&language=en&item=property&type=ngram&size={self.query_size}&instance_of=',
+                            verify=False)
                         for x in response2d.json():
                             query_result.add(x['qnode'])
         except:
             return []
 
         if type_:
-            return [x for x in query_result if PropertyFinder.metadata.check_property_exists(x) and PropertyFinder.metadata.check_type(x, type_)]
+            return [x for x in query_result if
+                    PropertyFinder.metadata.check_property_exists(x) and PropertyFinder.metadata.check_type(x, type_)]
 
         return [x for x in query_result]
 
@@ -96,7 +115,7 @@ class PropertyFinder(object):
         ''' Given a relation R, generate the triples such that
             X R Y, containing all X, Y that satisfying this relation
         '''
-        pr = pd.read_csv(FILE_claims_property, sep='\t', usecols=['node1','label','node2'])
+        pr = pd.read_csv(FILE_claims_property, sep='\t', usecols=['node1', 'label', 'node2'])
         pr = pr[pr['label'].apply(lambda x: x == label)].reset_index(drop=True)
         pr = pr[['node1', 'node2']]
 
@@ -139,10 +158,10 @@ class PropertyFinder(object):
         r = {}
         r[0] = []
         for i, L in enumerate(ranked):
-            r[i+1] = []
+            r[i + 1] = []
             for pnode in ranked[L]:
                 if PropertyFinder.metadata.check_type(pnode, type_):
-                    r[i+1].append(pnode)
+                    r[i + 1].append(pnode)
 
         r[4] = []
 
@@ -201,7 +220,6 @@ class PropertyFinder(object):
         return r
 
     def filter_by_allowed_qualifiers(self, ranked, constraint):
-
 
         if constraint is None:
             return ranked
@@ -267,7 +285,6 @@ class PropertyFinder(object):
 
         return r
 
-
     def find_property(self, label, params):
 
         params['type'] = PropertyFinder.metadata.get_type_alias(params['type'])
@@ -278,7 +295,8 @@ class PropertyFinder(object):
             candidates = self.filter_ranked(candidates, params)
 
         for level in candidates:
-            candidates[level] = PropertyFinder.ranker.rank(candidates[level], label, PropertyFinder.metadata, scope=params['scope'])
+            candidates[level] = PropertyFinder.ranker.rank(candidates[level], label, PropertyFinder.metadata,
+                                                           scope=params['scope'])
 
         return dict(sorted(candidates.items(), key=lambda x: x[0]))
 
@@ -299,7 +317,7 @@ class PropertyFinder(object):
             params['filter'] = True
         if not 'constraint' in params:
             params['constraint'] = None
-        if not 'otherProperties'  in params:
+        if not 'otherProperties' in params:
             params['otherProperties'] = ''
 
         label = params.pop('label')
@@ -325,9 +343,9 @@ class PropertyFinder(object):
         return {'label': label,
                 'type': type_,
                 'scope': scope,
-                'filter': filter=='true',
+                'filter': filter == 'true',
                 'constraint': constraint,
-                'otherProperties': otherProperties }
+                'otherProperties': otherProperties}
 
     def search(self):
         ''' Flask API interface
@@ -342,7 +360,8 @@ class PropertyFinder(object):
             return {'Error': 'Input data_type is not supported'}, 400
 
         # Check remote is running
-        response = get(f'{self.host}/time?extra_info=true&language=en&item=property&type=ngram&size=1&instance_of=', verify=False)
+        response = get(f'{self.host}/time?extra_info=true&language=en&item=property&type=ngram&size=1&instance_of=',
+                       verify=False)
         if response.status_code >= 500:
             return {'Error': 'Remote service for querying properties is down.'}, 500
 

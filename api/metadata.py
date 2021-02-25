@@ -1,16 +1,17 @@
 import pandas as pd
 from .settings import FILE_label, FILE_alias, FILE_description, FILE_datatype
 
-
 allowed_types = ['commonsMedia', 'wikibase-item', 'external-id', 'url', 'string',
-                    'quantity', 'time', 'globe-coordinate', 'monolingualtext',
-                    'wikibase-property', 'math', 'geo-shape', 'tabular-data',
-                    'wikibase-lexeme', 'wikibase-form', 'wikibase-sense',
-                    'musical-notation']
+                 'quantity', 'time', 'globe-coordinate', 'monolingualtext',
+                 'wikibase-property', 'math', 'geo-shape', 'tabular-data',
+                 'wikibase-lexeme', 'wikibase-form', 'wikibase-sense',
+                 'musical-notation']
 
 type_aliases = {'media': 'commonsMedia', 'item': 'wikibase-item', 'id': 'external-id', 'coordinate': 'globe-coordinate',
-                'property': 'wikibase-property', 'lexeme': 'wikibase-lexeme', 'form': 'wikibase-form', 'sense': 'wikibase-sense',
+                'property': 'wikibase-property', 'lexeme': 'wikibase-lexeme', 'form': 'wikibase-form',
+                'sense': 'wikibase-sense',
                 'country': 'wikibase-item', 'location': 'wikibase-item'}
+
 
 class PropertyMetaData(object):
 
@@ -56,8 +57,8 @@ class PropertyMetaData(object):
                'alias': self.name_table.loc[pnode]['alias'],
                'score': score,
                'data_type': self.name_table.loc[pnode]['data_type'],
-               #'warning': warning
-                }
+               # 'warning': warning
+               }
 
         return dic
 

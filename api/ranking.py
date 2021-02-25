@@ -4,6 +4,7 @@ from collections import defaultdict
 from difflib import SequenceMatcher
 from .settings import FILE_claims_count, FILE_qualifiers_count, FILE_total_count
 
+
 class PropertyRanker(object):
 
     def __init__(self):
@@ -12,13 +13,13 @@ class PropertyRanker(object):
 
     def _build_table(self):
 
-        claims_counts = pd.read_csv(FILE_claims_count, sep='\t', usecols=['node1','node2']).set_index('node1')
+        claims_counts = pd.read_csv(FILE_claims_count, sep='\t', usecols=['node1', 'node2']).set_index('node1')
         claims_counts.columns = [['main value']]
 
-        qualifier_counts = pd.read_csv(FILE_qualifiers_count, sep='\t', usecols=['node1','node2']).set_index('node1')
+        qualifier_counts = pd.read_csv(FILE_qualifiers_count, sep='\t', usecols=['node1', 'node2']).set_index('node1')
         qualifier_counts.columns = [['qualifier']]
 
-        total_counts = pd.read_csv(FILE_total_count, sep='\t', usecols=['node1','node2']).set_index('node1')
+        total_counts = pd.read_csv(FILE_total_count, sep='\t', usecols=['node1', 'node2']).set_index('node1')
         total_counts.columns = [['total']]
 
         glossory = pd.concat([claims_counts, qualifier_counts, total_counts], axis=1).fillna(0).astype(int)
@@ -55,6 +56,6 @@ class PropertyRanker(object):
         sim = self.gen_similarity(pnodes, query, metadata)
 
         for pnode in pnodes:
-            ranking[pnode] = sim[pnode] * np.log(counts[pnode]+1)
+            ranking[pnode] = sim[pnode] * np.log(counts[pnode] + 1)
 
-        return dict(sorted(ranking.items(), key=lambda x:x[1], reverse=True))
+        return dict(sorted(ranking.items(), key=lambda x: x[1], reverse=True))
