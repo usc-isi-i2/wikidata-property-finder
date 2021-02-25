@@ -328,7 +328,7 @@ class PropertyFinder(object):
         for level in candidates:
             for pnode, score in candidates[level].items():
 
-                results.append(PropertyFinder.metadata.get_info(pnode, score))
+                results.append(PropertyFinder.metadata.get_info(pnode, score, params['extra_info']))
                 if len(results) >= size:
                     break
 
@@ -337,7 +337,7 @@ class PropertyFinder(object):
 
         return results
 
-    def _build_params(self, label, type_, scope='both', filter='true', constraint=None, otherProperties=''):
+    def _build_params(self, label, type_, scope='both', filter='true', constraint=None, otherProperties='', extra_info=False):
         ''' Build the dictionary of parameters
         '''
         return {'label': label,
@@ -345,7 +345,8 @@ class PropertyFinder(object):
                 'scope': scope,
                 'filter': filter == 'true',
                 'constraint': constraint,
-                'otherProperties': otherProperties}
+                'otherProperties': otherProperties,
+                'extra_info': extra_info}
 
     def search(self):
         ''' Flask API interface
@@ -370,12 +371,13 @@ class PropertyFinder(object):
         constraint = request.args.get('constraint', None)
         otherProperties = request.args.get('otherProperties', '')
         size = request.args.get('size', 10)
+        extra_info = request.args.get('extra_info', False)
 
         try:
             size = int(size)
         except:
             return {'Error': 'size parameter must be an integer'}, 400
 
-        params = self._build_params(label, type_, scope, filter, constraint, otherProperties)
+        params = self._build_params(label, type_, scope, filter, constraint, otherProperties, extra_info)
 
         return self.generate_top_candidates(params, size)

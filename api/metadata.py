@@ -1,5 +1,8 @@
 import pandas as pd
-from .settings import FILE_label, FILE_alias, FILE_description, FILE_datatype
+import math
+from requests import get
+from collections import defaultdict
+from .settings import FILE_label, FILE_alias, FILE_description, FILE_datatype, es_url, es_index
 
 allowed_types = ['commonsMedia', 'wikibase-item', 'external-id', 'url', 'string',
                  'quantity', 'time', 'globe-coordinate', 'monolingualtext',
@@ -17,7 +20,9 @@ class PropertyMetaData(object):
 
     def __init__(self):
 
+        self.host = es_url + '/' + es_index
         self.name_table = self._build_names()
+        self.remote_metadata = defaultdict(dict)
 
     def _build_names(self):
         ''' Build a table that includes the following information
@@ -48,17 +53,21 @@ class PropertyMetaData(object):
 
         return merged
 
-    def get_info(self, pnode, score=0.0, warning=[]):
+    def get_info(self, pnode, score=0.0, extra_info=False, warning=[]):
         ''' Return the properties according to the required format
         '''
+        res = get(f'{self.host}/_doc/{pnode}').json()
+
         dic = {'qnode': pnode,
-               'description': self.name_table.loc[pnode]['description'],
-               'label': self.name_table.loc[pnode]['label'],
-               'alias': self.name_table.loc[pnode]['alias'],
-               'score': score,
-               'data_type': self.name_table.loc[pnode]['data_type'],
-               # 'warning': warning
-               }
+               'description': [self.name_table.loc[pnode]['description']]
+        }
+        if extra_info:
+            dic['label'] = self.name_table.loc[pnode]['label']
+            dic['alias'] = self.name_table.loc[pnode]['alias']
+            dic['pagerank'] = res['_source']['pagerank']
+            dic['statements'] = res['_source']['statements']
+            dic['score'] = score
+            dic['data_type'] = self.name_table.loc[pnode]['data_type']
 
         return dic
 

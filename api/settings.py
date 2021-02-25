@@ -11,3 +11,6 @@ FILE_claims_property = 'data/claims.properties.tsv.gz'
 
 JSON_constraints = 'data/constraints.json'
 KGTK_search = 'https://kgtk.isi.edu/api'
+
+es_url = 'http://ckg06.isi.edu:9200'
+es_index = 'wikidataos-07'
