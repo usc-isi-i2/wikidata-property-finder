@@ -337,7 +337,8 @@ class PropertyFinder(object):
 
         return results
 
-    def _build_params(self, label, type_, scope='both', filter='true', constraint=None, otherProperties='', extra_info=False):
+    def _build_params(self, label, type_, scope='both', filter='true', constraint=None,
+                      otherProperties='', extra_info=False):
         ''' Build the dictionary of parameters
         '''
         return {'label': label,
@@ -378,6 +379,7 @@ class PropertyFinder(object):
         except:
             return {'Error': 'size parameter must be an integer'}, 400
 
-        params = self._build_params(label, type_, scope, filter, constraint, otherProperties, extra_info)
+        params = self._build_params(label, type_, scope, filter, constraint,
+                                    otherProperties, extra_info)
 
         return self.generate_top_candidates(params, size)
