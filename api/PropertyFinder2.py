@@ -52,7 +52,7 @@ class PropertyFinder(object):
             if len(query_result) == 0 and self.ninja:
                 label_splitted = ' '.join([x[:10] for x in wordninja.split(label)])
                 response2 = get(
-                    f'{self.host}/{label_splitted}?extra_info=true&language=en&item=property'
+                    f'{self.host}/{label_splitted}?language=en&item=property'
                     f'&type=ngram&size={self.query_size}&instance_of=',
                     verify=False)
                 for x in response2.json():
@@ -328,7 +328,7 @@ class PropertyFinder(object):
         for level in candidates:
             for pnode, score in candidates[level].items():
 
-                results.append(PropertyFinder.metadata.get_info(pnode, score))
+                results.append(PropertyFinder.metadata.get_info(pnode, score, params['extra_info']))
                 if len(results) >= size:
                     break
 
@@ -337,15 +337,17 @@ class PropertyFinder(object):
 
         return results
 
-    def _build_params(self, label, type_, scope='both', filter='true', constraint=None, otherProperties=''):
+    def _build_params(self, label, type_, scope='both', filter='true', constraint=None,
+                      otherProperties='', extra_info=False):
         ''' Build the dictionary of parameters
         '''
         return {'label': label,
                 'type': type_,
                 'scope': scope,
-                'filter': filter == 'true',
+                'filter': filter.lower() == 'true',
                 'constraint': constraint,
-                'otherProperties': otherProperties}
+                'otherProperties': otherProperties,
+                'extra_info': extra_info.lower() == 'true'}
 
     def search(self):
         ''' Flask API interface
@@ -355,6 +357,8 @@ class PropertyFinder(object):
             return {'Error': 'label (query string) needed. Please enter the following parameter ?label=xxx'}, 400
 
         type_ = request.args.get('data_type', None)
+        if type_ is None:
+            type_ = request.args.get('type', None)
 
         if not type_ is None and not PropertyFinder.metadata.check_type_allowed(type_):
             return {'Error': 'Input data_type is not supported'}, 400
@@ -370,12 +374,14 @@ class PropertyFinder(object):
         constraint = request.args.get('constraint', None)
         otherProperties = request.args.get('otherProperties', '')
         size = request.args.get('size', 10)
+        extra_info = request.args.get('extra_info', 'false')
 
         try:
             size = int(size)
         except:
             return {'Error': 'size parameter must be an integer'}, 400
 
-        params = self._build_params(label, type_, scope, filter, constraint, otherProperties)
+        params = self._build_params(label, type_, scope, filter, constraint,
+                                    otherProperties, extra_info)
 
         return self.generate_top_candidates(params, size)

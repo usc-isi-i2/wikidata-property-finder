@@ -8,6 +8,7 @@ FILE_qualifiers_count = 'data/qualifiers.label.property.counts.tsv.gz'
 FILE_total_count = 'data/all.label.property.counts.tsv.gz'
 
 FILE_claims_property = 'data/claims.properties.tsv.gz'
+FILE_metadata = 'data/metadata.json'
 
 JSON_constraints = 'data/constraints.json'
 KGTK_search = 'https://kgtk.isi.edu/api'
